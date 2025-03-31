@@ -21,7 +21,7 @@ class NCF(nn.Module):
             # Input layer shrinks by 2 every time (i times in total). The last layer output has the 
             # desirable embedding dim 
             input_size = self.embedding_dim * (2 ** (self.num_mlp_layers - i))
-            MLP_layers.append(nn.Linear(input_size, input_size // 2))
+            MLP_layers.append(nn.Linear(input_size, input_size//2))
             MLP_layers.append(nn.Dropout(self.dropout))
             MLP_layers.append(nn.ReLU())
         self.MLP_layers = nn.Sequential(*MLP_layers)
@@ -33,7 +33,12 @@ class NCF(nn.Module):
             NeuMF_size = self.embedding_dim 
         else:
             raise('Please use at least one model, either GMF or MLP')
-        self.NeuMF_layer = nn.Sigmoid(NeuMF_size, 1)
+        
+        self.NeuMF_layer = nn.Sequential(
+                nn.Linear(NeuMF_size, 1),
+                nn.Sigmoid()
+                )
+        
 
 
         

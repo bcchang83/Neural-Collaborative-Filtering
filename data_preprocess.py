@@ -133,7 +133,7 @@ def run_data_preprocess(path_rating, path_user, path_movie):
     train_dataset, test_dataset, val_dataset = torch.utils.data.random_split(full_dataset, [0.7, 0.15, 0.15])
     print(f"Train size: {len(train_dataset)}, Test size: {len(test_dataset)}, Val size: {len(val_dataset)}")
     
-    return train_dataset, test_dataset, val_dataset, num_users, num_movies
+    return train_dataset, val_dataset, test_dataset, num_users, num_movies
 
 if __name__ == '__main__':
     # Load data
@@ -141,7 +141,7 @@ if __name__ == '__main__':
     path_user = "./ml-1m/users.dat"
     path_movie = "./ml-1m/movies.dat"
     
-    train_dataset, test_dataset, val_dataset, num_users, num_movies = run_data_preprocess(path_rating=path_rating, path_user=path_user, path_movie=path_movie)
+    train_dataset, val_dataset, test_dataset, num_users, num_movies = run_data_preprocess(path_rating=path_rating, path_user=path_user, path_movie=path_movie)
 
 
 # df_rating = pd.read_csv(path_rating, sep="::", engine="python", names=["UserID", "MovieID", "Rating", "Timestamp"], encoding="ISO-8859-1")

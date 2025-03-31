@@ -1,5 +1,3 @@
-runs/.DS_Store
-runs/movielens_training_20250331_171708/.DS_Store
-runs/movielens_training_20250331_172252/.DS_Store
-runs/movielens_training_20250331_172812/.DS_Store
-runs/movielens_training_20250331_191547/.DS_Store
+runs/
+__pycache__/
+

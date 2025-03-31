@@ -19,7 +19,7 @@ def evaluate(model, testing_loader):
     with torch.no_grad():
         for i, t_data in enumerate(testing_loader):
             t_user, t_movie, t_labels = t_data
-            t_outputs = saved_model(t_user, t_movie)
+            t_outputs = model(t_user, t_movie)
             t_loss = loss(t_outputs, t_labels)
             running_t_loss += t_loss
             prediction_loss_dict["UserID"].append(*t_user)

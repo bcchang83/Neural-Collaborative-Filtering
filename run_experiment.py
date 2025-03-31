@@ -6,6 +6,8 @@ from train import train_model
 from evaluate import evaluate
 from model import NCF
 from data_preprocess import run_data_preprocess
+from visualization import plot_training_history
+
 
 def train_one_epoch(epoch_index, tb_writer, training_loader, optimizer, loss_function):
     running_loss = 0.
@@ -52,7 +54,7 @@ if __name__ == '__main__':
     path_movie = "./ml-1m/movies.dat"
     
     # hyperparameter
-    epochs_num = 2
+    epochs_num = 5
     early_stopping_th = 0.1
     
     # load data and preprocess
@@ -68,8 +70,10 @@ if __name__ == '__main__':
     # train model
     training_history = train_model(model=model, training_loader=training_loader, validation_loader=validation_loader, epochs_num=epochs_num, early_stopping_th=early_stopping_th)
     
-    # Here model is trained and saved, time to test!
+    plot_training_history(training_history)
     
+    # Here model is trained and saved, time to test!
+    evaluate(model, testing_loader)
     
     # # Define optimizer and loss function
     # optim = torch.optim.Adam(model.parameters(), lr=0.001)

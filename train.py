@@ -64,7 +64,7 @@ def train_model(model, training_loader, validation_loader, epochs_num = 50, lear
         }
     
     for i in range(epochs_num):
-        print(f"Training epoch ={i+1}")
+        print(f"Training epoch = {i+1} / {epochs_num}")
         model.train(True)
         avg_loss = train_one_epoch(model, i, writer, training_loader, optim, loss_fn)
             

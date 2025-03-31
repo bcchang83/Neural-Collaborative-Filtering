@@ -44,12 +44,8 @@ class NCF(nn.Module):
                 nn.Sigmoid()
                 )
         
-
-
-        
-        # self._init_weight_()
-        
-        
+        # Loss function
+        self.loss_fn = torch.nn.BCELoss()
     
     def forward(self, user_ids, movie_ids):
         user_embeds = self.user_embedding(user_ids)

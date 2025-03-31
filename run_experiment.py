@@ -1,9 +1,10 @@
-from model import NCF
-from data_preprocess import run_data_preprocess
+
 import torch.optim 
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
-
+from train import train_model
+from model import NCF
+from data_preprocess import run_data_preprocess
 def train_one_epoch(epoch_index, tb_writer, training_loader, optimizer, loss_function):
     running_loss = 0.
     last_loss = 0.
@@ -48,61 +49,73 @@ if __name__ == '__main__':
     path_user = "./ml-1m/users.dat"
     path_movie = "./ml-1m/movies.dat"
     
+    # hyperparameter
+    epochs_num = 2
+    early_stopping_th = 0.1
+    
+    # load data and preprocess
     train_set, val_set, test_set, num_users, num_movies = run_data_preprocess(path_rating=path_rating, path_user=path_user, path_movie=path_movie)
     
     training_loader = torch.utils.data.DataLoader(train_set, batch_size=4, shuffle=True)
     validation_loader = torch.utils.data.DataLoader(val_set, batch_size=4, shuffle=False)
+    testing_loader = torch.utils.data.DataLoader(test_set, batch_size=4, shuffle=False)
 
     # build model
     model = NCF(num_users=num_users, num_movies=num_movies)
 
-    # Define optimizer and loss function
-    optim = torch.optim.Adam(model.parameters(), lr=0.01)
-    loss = torch.nn.BCELoss()
+    # train model
+    training_history = train_model(model=model, training_loader=training_loader, validation_loader=validation_loader, epochs_num=epochs_num, early_stopping_th=early_stopping_th)
+    
+    
+    
+    # # Define optimizer and loss function
+    # optim = torch.optim.Adam(model.parameters(), lr=0.001)
+    # loss = torch.nn.BCELoss()
 
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    writer = SummaryWriter('runs/movielens_training_{}'.format(timestamp))
-    epochs_num = 10
-    early_stopping_th = 0.1
+    # timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    # writer = SummaryWriter('runs/movielens_training_{}'.format(timestamp))
+    # epochs_num = 10
+    # early_stopping_th = 0.1
+    # best_vloss = float("-inf")
 
-    for i in range(epochs_num):
-        print(f"Training epoch ={i+1}")
-        model.train(True)
-        avg_loss = train_one_epoch(i, writer, training_loader, optim, loss)
+    # for i in range(epochs_num):
+    #     print(f"Training epoch ={i+1}")
+    #     model.train(True)
+    #     avg_loss = train_one_epoch(i, writer, training_loader, optim, loss)
             
-        running_vloss = 0.0
-        # Set the model to evaluation mode, disabling dropout and using population
-        # statistics for batch normalization.
-        model.eval()
+    #     running_vloss = 0.0
+    #     # Set the model to evaluation mode, disabling dropout and using population
+    #     # statistics for batch normalization.
+    #     model.eval()
 
-        # Disable gradient computation and reduce memory consumption.
-        with torch.no_grad():
-            for i, vdata in enumerate(validation_loader):
-                vuser, vmovie, vlabels = vdata
-                voutputs = model(vuser, vmovie)
-                vloss = loss(voutputs, vlabels)
-                running_vloss += vloss
+    #     # Disable gradient computation and reduce memory consumption.
+    #     with torch.no_grad():
+    #         for i, vdata in enumerate(validation_loader):
+    #             vuser, vmovie, vlabels = vdata
+    #             voutputs = model(vuser, vmovie)
+    #             vloss = loss(voutputs, vlabels)
+    #             running_vloss += vloss
 
-        avg_vloss = running_vloss / (i + 1)
-        print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
+    #     avg_vloss = running_vloss / (i + 1)
+    #     print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
 
-        # Log the running loss averaged per batch
-        # for both training and validation
-        writer.add_scalars('Training vs. Validation Loss',
-                        { 'Training' : avg_loss, 'Validation' : avg_vloss },
-                        i + 1)
-        writer.flush()
+    #     # Log the running loss averaged per batch
+    #     # for both training and validation
+    #     writer.add_scalars('Training vs. Validation Loss',
+    #                     { 'Training' : avg_loss, 'Validation' : avg_vloss },
+    #                     i + 1)
+    #     writer.flush()
 
-        # Track best performance, and save the model's state
-        if avg_vloss < best_vloss:
-            best_vloss = avg_vloss
-            model_path = 'model_{}_{}'.format(timestamp, i + 1)
-            torch.save(model.state_dict(), model_path)
+    #     # Track best performance, and save the model's state
+    #     if avg_vloss < best_vloss:
+    #         best_vloss = avg_vloss
+    #         model_path = 'model_{}_{}'.format(timestamp, i + 1)
+    #         torch.save(model.state_dict(), model_path)
 
-        # epoch_number += 1
-        # early stopping
-        if avg_vloss < early_stopping_th:
-            break
+    #     # epoch_number += 1
+    #     # early stopping
+    #     if avg_vloss < early_stopping_th:
+    #         break
 
     # Here model is trained and saved, time to test!
 

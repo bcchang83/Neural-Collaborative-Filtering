@@ -5,6 +5,40 @@ import pandas as pd
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
 
+def evaluate(model, testing_loader):
+    prediction_results = {
+        "UserID":[],
+        "MovieID":[],
+        "Label":[],
+        "Prediction":[]
+    }
+    loss_fn = model.loss_fn
+    t_loss = 0.0
+    model.eval()
+    
+    with torch.no_grad():
+        for i, t_data in enumerate(testing_loader):
+            t_user, t_movie, t_labels = t_data
+            t_outputs = saved_model(t_user, t_movie)
+            t_loss = loss(t_outputs, t_labels)
+            running_t_loss += t_loss
+            prediction_loss_dict["UserID"].append(*t_user)
+            prediction_loss_dict["MovieID"].append(*t_movie)
+            prediction_loss_dict["Label"].append(*t_labels)
+            prediction_loss_dict["Prediction"].append(*t_outputs)
+
+    avg_t_loss = t_loss / (i + 1)
+    print(f"Testing loss = {avg_t_loss}")
+    
+    # Compure recall at 10
+    df = pd.DataFrame(prediction_loss_dict)
+    df.sort_values("Prediction", ascending=False, inplace=True)
+    df_top10 = df.head(10)
+    recall_10 = df_top10["Label"].sum()/10
+    print(f"Testing recall@10 = {recall_10}")
+    
+    
+    
 if __name__ == '__main__':
 
     saved_model = NCF()

@@ -35,7 +35,7 @@ def train_one_epoch(epoch_index, tb_writer, training_loader, optimizer, loss_fun
         running_loss += loss.item()
         if i % 1000 == 999:
             last_loss = running_loss / 1000 # loss per batch
-            print('  batch {} loss: {}'.format(i + 1, last_loss))
+            print('  batch {} loss: {}'.format(i + 1, last_loss), end="\r", flush=True)
             tb_x = epoch_index * len(training_loader) + i + 1
             tb_writer.add_scalar('Loss/train', last_loss, tb_x)
             running_loss = 0.
@@ -63,9 +63,10 @@ if __name__ == '__main__':
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     writer = SummaryWriter('runs/movielens_training_{}'.format(timestamp))
     epochs_num = 10
+    early_stopping_th = 0.1
 
     for i in range(epochs_num):
-
+        print(f"Training epoch ={i+1}")
         model.train(True)
         avg_loss = train_one_epoch(i, writer, training_loader, optim, loss)
             
@@ -77,8 +78,8 @@ if __name__ == '__main__':
         # Disable gradient computation and reduce memory consumption.
         with torch.no_grad():
             for i, vdata in enumerate(validation_loader):
-                vinputs, vlabels = vdata
-                voutputs = model(vinputs)
+                vuser, vmovie, vlabels = vdata
+                voutputs = model(vuser, vmovie)
                 vloss = loss(voutputs, vlabels)
                 running_vloss += vloss
 
@@ -89,7 +90,7 @@ if __name__ == '__main__':
         # for both training and validation
         writer.add_scalars('Training vs. Validation Loss',
                         { 'Training' : avg_loss, 'Validation' : avg_vloss },
-                        epoch_number + 1)
+                        epochs_num + 1)
         writer.flush()
 
         # Track best performance, and save the model's state
@@ -99,6 +100,8 @@ if __name__ == '__main__':
             torch.save(model.state_dict(), model_path)
 
         epoch_number += 1
-
+        # early stopping
+        if avg_vloss < early_stopping_th:
+            break
 
 

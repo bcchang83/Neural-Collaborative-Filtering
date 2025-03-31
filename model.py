@@ -17,8 +17,9 @@ class NCF(nn.Module):
         self.item_embedding = torch.nn.Embedding(num_movies, embedding_dim=embedding_dim)
 
         # Initialize MLP layers
-        self.embed_user_MLP = nn.Embedding(num_users, embedding_dim * (2 ** (num_mlp_layers - 1)))
-		self.embed_item_MLP = nn.Embedding(num_movies, embedding_dim * (2 ** (num_mlp_layers - 1)))
+        self.user_embedding_MLP = nn.Embedding(num_users, embedding_dim * (2 ** (num_mlp_layers - 1)))
+        self.item_embedding_MLP = nn.Embedding(num_movies, embedding_dim * (2 ** (num_mlp_layers - 1)))
+        
         MLP_layers = []
         for i in range(self.num_mlp_layers):
             # Input layer shrinks by 2 every time (i times in total). The last layer output has the 
@@ -54,6 +55,9 @@ class NCF(nn.Module):
         user_embeds = self.user_embedding(user_ids)
         item_embeds = self.item_embedding(movie_ids)
 
+        user_embeds_MLP = self.user_embedding_MLP(user_ids)
+        item_embeds_MLP = self.item_embedding_MLP(movie_ids)
+
         # GMF layer
         if self.GMF:
             # hadamard_product = torch.mul(user_embeds, item_embeds)
@@ -62,9 +66,8 @@ class NCF(nn.Module):
 
         # MLP layer
         if self.MLP:
-            print(f"user shape={user_embeds.shape}\nmovie shape={item_embeds.shape}\n")
-            breakpoint()
-            MLP_output = self.MLP_layers(torch.cat((user_embeds, item_embeds), -1)) # -1 as we concat along the last dimension
+            print(f"user shape={user_embeds_MLP.shape}\nmovie shape={item_embeds_MLP.shape}\n")
+            MLP_output = self.MLP_layers(torch.cat((user_embeds_MLP, item_embeds_MLP), -1)) # -1 as we concat along the last dimension
             
         if self.GMF and self.MLP:
             NeuMF_input = torch.cat((GMF_output, MLP_output), -1)

@@ -17,3 +17,4 @@ def plot_training_history(history):
     plt.legend()
     plt.grid(True)
     plt.show()
+    plt.savefig("training_history.png")

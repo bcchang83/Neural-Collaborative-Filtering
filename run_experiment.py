@@ -48,27 +48,46 @@ def train_one_epoch(epoch_index, tb_writer, training_loader, optimizer, loss_fun
     return last_loss
 
 if __name__ == '__main__':
-    # load data and preprocess
+    # data path
     path_rating = "./ml-1m/ratings.dat"
     path_user = "./ml-1m/users.dat"
     path_movie = "./ml-1m/movies.dat"
     
-    # hyperparameter
-    epochs_num = 5
+    # hyperparameter for model
+    embedding_dim = 32
+    dropout=0.1
+    num_mlp_layers=1
+    GMF=True
+    MLP=True
+    
+    # hyperparameter for training
+    epochs_num = 3
+    batch_size = 32
+    learning_rate = 0.001
     early_stopping_th = 0.1
     
     # load data and preprocess
     train_set, val_set, test_set, num_users, num_movies = run_data_preprocess(path_rating=path_rating, path_user=path_user, path_movie=path_movie)
     
-    training_loader = torch.utils.data.DataLoader(train_set, batch_size=4, shuffle=True)
-    validation_loader = torch.utils.data.DataLoader(val_set, batch_size=4, shuffle=False)
-    testing_loader = torch.utils.data.DataLoader(test_set, batch_size=4, shuffle=False)
+    training_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True)
+    validation_loader = torch.utils.data.DataLoader(val_set, batch_size=batch_size, shuffle=False)
+    testing_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=False)
 
     # build model
-    model = NCF(num_users=num_users, num_movies=num_movies)
+    model = NCF(num_users=num_users,
+                num_movies=num_movies,
+                embedding_dim=embedding_dim,
+                dropout=dropout,
+                num_mlp_layers=num_mlp_layers,
+                GMF=GMF, MLP=MLP)
 
     # train model
-    training_history = train_model(model=model, training_loader=training_loader, validation_loader=validation_loader, epochs_num=epochs_num, early_stopping_th=early_stopping_th)
+    training_history = train_model(model=model,
+                                   training_loader=training_loader,
+                                   validation_loader=validation_loader,
+                                   epochs_num=epochs_num,
+                                   learning_rate=learning_rate,
+                                   early_stopping_th=early_stopping_th)
     
     plot_training_history(training_history)
     

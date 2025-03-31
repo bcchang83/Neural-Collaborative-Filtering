@@ -55,13 +55,13 @@ if __name__ == '__main__':
     
     # hyperparameter for model
     embedding_dim = 32
-    dropout=0.1
-    num_mlp_layers=1
+    dropout=0.3
+    num_mlp_layers=3
     GMF=True
     MLP=True
     
     # hyperparameter for training
-    epochs_num = 10
+    epochs_num = 50
     batch_size = 32
     learning_rate = 0.001
     early_stopping_th = 0.1

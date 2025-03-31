@@ -45,7 +45,7 @@ def evaluate(model, testing_loader):
     # Compure recall at 10
     # recall_10 = df_top10["Label"].sum()/10 #this is precision
     recall_10 = df_top10["Label"].sum() / df["Label"].sum()
-    print(f"Testing recall@10 = {recall_10}")
+    print(f"Testing Recall@10 = {recall_10}")
     # Compute NDCG@10
     k = 10
     relevance_pred = df["Label"].values[:k]

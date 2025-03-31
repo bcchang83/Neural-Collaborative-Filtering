@@ -66,7 +66,7 @@ class NCF(nn.Module):
 
         # MLP layer
         if self.MLP:
-            print(f"user shape={user_embeds_MLP.shape}\nmovie shape={item_embeds_MLP.shape}\n")
+            # print(f"user shape={user_embeds_MLP.shape}\nmovie shape={item_embeds_MLP.shape}\n")
             MLP_output = self.MLP_layers(torch.cat((user_embeds_MLP, item_embeds_MLP), -1)) # -1 as we concat along the last dimension
             
         if self.GMF and self.MLP:

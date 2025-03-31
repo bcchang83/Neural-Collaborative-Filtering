@@ -87,7 +87,7 @@ class CustomDataset(Dataset):
         # -1 cuz index start from 0
         self.users = torch.tensor(dataframe["UserID"].values - 1, dtype=torch.int32)
         self.items = torch.tensor(dataframe["MovieID"].values, dtype=torch.int32)
-        self.labels = torch.tensor(dataframe["Label"].values, dtype=torch.int32)
+        self.labels = torch.tensor(dataframe["Label"].values, dtype=torch.float32)
     
     def __len__(self):
         # return len(self.Label)

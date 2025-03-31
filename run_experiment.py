@@ -90,16 +90,16 @@ if __name__ == '__main__':
         # for both training and validation
         writer.add_scalars('Training vs. Validation Loss',
                         { 'Training' : avg_loss, 'Validation' : avg_vloss },
-                        epochs_num + 1)
+                        i + 1)
         writer.flush()
 
         # Track best performance, and save the model's state
         if avg_vloss < best_vloss:
             best_vloss = avg_vloss
-            model_path = 'model_{}_{}'.format(timestamp, epoch_number)
+            model_path = 'model_{}_{}'.format(timestamp, i + 1)
             torch.save(model.state_dict(), model_path)
 
-        epoch_number += 1
+        # epoch_number += 1
         # early stopping
         if avg_vloss < early_stopping_th:
             break

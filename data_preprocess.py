@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-def negative_sampling(df_rating, df_movie):
+def negative_sampling(df_rating, df_movie, df_user):
     """
     Sampling non-interacted movie as label = 0
     Args:
@@ -27,28 +27,52 @@ def negative_sampling(df_rating, df_movie):
     # return df_add
     
     #Optimized code
-    
-    all_movies = set(df_movie.MovieID.unique())
-    #get the seen movie set for all user. apply() is faster
-    user_seen_dict = df_rating.groupby("UserID")["MovieID"].apply(set)
-    
-    sampled_data = []
+    all_users = df_user.UserID.unique()
+    all_movies = df_movie.MovieID.unique()
 
-    for user, seen_movies in user_seen_dict.items():
-        unseen_movies = list(all_movies - seen_movies)
-        num_seen = len(seen_movies)
-        
-        if len(unseen_movies) == 0:
-            continue
-        
-        num_sample = min(num_seen, len(unseen_movies))
-        unseen_sampled = np.random.choice(unseen_movies, num_sample, replace=False)
-        
-        sampled_data.extend(zip([user] * num_sample, unseen_sampled, [0] * num_sample))
+    exist_rating = set(zip(df_rating['UserID'], df_rating['MovieID']))
+
+    df_pos = df_rating[df_rating.Rating >= 4]
+    df_neg = df_rating[df_rating.Rating < 4]
+
+    diff = len(df_pos) - len(df_neg)
+    sampled_data = []
+    while diff > 0:
+        user = np.random.choice(all_users)
+        movie = np.random.choice(all_movies)
+        pair = (user, movie)
+        if pair not in exist_rating:
+            sampled_data.append((user, movie, 0))
+            exist_rating.add(pair)
+            diff -=1
 
     df_unseen = pd.DataFrame(sampled_data, columns=["UserID", "MovieID", "Rating"])
+    return pd.concat([df_rating, df_unseen], ignore_index=True)     
+            
+
+
+    # print(df_rating.head(10))
+    # all_movies = set(df_movie.MovieID.unique())
+    # #get the seen movie set for all user. apply() is faster
+    # user_seen_dict = df_rating.groupby("UserID")["MovieID"].apply(set)
     
-    return pd.concat([df_rating, df_unseen], ignore_index=True)
+    # sampled_data = []
+
+    # for user, seen_movies in user_seen_dict.items():
+    #     unseen_movies = list(all_movies - seen_movies)
+    #     num_seen = len(seen_movies)
+        
+    #     if len(unseen_movies) == 0:
+    #         continue
+    #     # Suggest at least as many as they already saw
+    #     num_sample = min(num_seen, len(unseen_movies))
+    #     unseen_sampled = np.random.choice(unseen_movies, num_sample, replace=False)
+        
+    #     sampled_data.extend(zip([user] * num_sample, unseen_sampled, [0] * num_sample))
+
+    # df_unseen = pd.DataFrame(sampled_data, columns=["UserID", "MovieID", "Rating"])
+    
+    # return pd.concat([df_rating, df_unseen], ignore_index=True)
         
         
 # refer: https://pytorch.org/tutorials/beginner/basics/data_tutorial.html#creating-a-custom-dataset-for-your-files
@@ -86,14 +110,15 @@ def run_data_preprocess(path_rating, path_user, path_movie):
     num_movies = len(df_movie.MovieID.unique())
     print(f"Number of Users = {num_users}\nNumber of Movies = {num_movies}")
 
-    # Sample non-interacted movies
-    df_rating_add = negative_sampling(df_rating, df_movie)
+    # Sample non-interacted movies as negatives
+    df_rating_add = negative_sampling(df_rating, df_movie, df_user)
+    # print(df_rating_add.Rating.value_counts())
 
     # Label
     df_rating_add["Label"] = -1
     df_rating_add.loc[df_rating_add.Rating >= 4,'Label'] = 1
-    df_rating_add.loc[df_rating_add.Rating == 0,'Label'] = 0
-    print(df_rating_add['Label'].value_counts())
+    df_rating_add.loc[df_rating_add.Rating < 4,'Label'] = 0
+    # print(df_rating_add['Label'].value_counts())
     # balance the label?
 
     df_labeled = df_rating_add[df_rating_add.Label.isin([0, 1])].copy().loc[:,["UserID", "MovieID", "Label"]]

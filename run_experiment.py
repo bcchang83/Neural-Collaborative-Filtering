@@ -55,16 +55,17 @@ if __name__ == '__main__':
     
     # hyperparameter for model
     embedding_dim = 32
-    dropout=0.3
+    dropout=0.2
     num_mlp_layers=3
     GMF=True
     MLP=True
     
     # hyperparameter for training
-    epochs_num = 50
-    batch_size = 32
+    epochs_num = 100
+    batch_size = 256
     learning_rate = 0.001
     early_stopping_th = 0.1
+    weight_decay = 1e-5
     
     # load data and preprocess
     train_set, val_set, test_set, num_users, num_movies = run_data_preprocess(path_rating=path_rating, path_user=path_user, path_movie=path_movie)
@@ -80,14 +81,15 @@ if __name__ == '__main__':
                 dropout=dropout,
                 num_mlp_layers=num_mlp_layers,
                 GMF=GMF, MLP=MLP)
-
+    print(model)
     # train model
     training_history = train_model(model=model,
-                                   training_loader=training_loader,
-                                   validation_loader=validation_loader,
-                                   epochs_num=epochs_num,
-                                   learning_rate=learning_rate,
-                                   early_stopping_th=early_stopping_th)
+                                training_loader=training_loader,
+                                validation_loader=validation_loader,
+                                epochs_num=epochs_num,
+                                learning_rate=learning_rate,
+                                early_stopping_th=early_stopping_th,
+                                weight_decay=weight_decay)
     
     plot_training_history(training_history)
     

@@ -45,9 +45,10 @@ def train_one_epoch(model, epoch_index, tb_writer, training_loader, optimizer, l
 
 
 
-def train_model(model, training_loader, validation_loader, epochs_num = 50, learning_rate = 0.001, early_stopping_th = 0.1):
+def train_model(model, training_loader, validation_loader, epochs_num = 50, learning_rate = 0.001, early_stopping_th = 0.1, weight_decay = 1e-5):
     # Define optimizer and loss function
-    optim = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    optim = torch.optim.Adam(model.parameters(), lr=learning_rate, 
+                            weight_decay=weight_decay)# l2 reg
     loss_fn = model.loss_fn
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')

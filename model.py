@@ -40,7 +40,9 @@ class NCF(nn.Module):
             raise('Please use at least one model, either GMF or MLP')
         # Final prediction
         self.NeuMF_layer = nn.Sequential(
-                nn.Linear(NeuMF_size, 1),
+                nn.Linear(NeuMF_size, NeuMF_size//2),
+                nn.ReLU(),
+                nn.Linear(NeuMF_size//2, 1),
                 nn.Sigmoid()
                 )
         
@@ -56,8 +58,8 @@ class NCF(nn.Module):
 
         # GMF layer
         if self.GMF:
-            # hadamard_product = torch.mul(user_embeds, item_embeds)
-            hadamard_product = user_embeds * item_embeds
+            hadamard_product = torch.mul(user_embeds, item_embeds)
+            # hadamard_product = user_embeds * item_embeds
             GMF_output = hadamard_product #nn.Linear(self.embedding_dim, 1)(hadamard_product)
 
         # MLP layer

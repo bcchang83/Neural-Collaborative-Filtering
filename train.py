@@ -3,6 +3,7 @@ from data_preprocess import run_data_preprocess
 import torch.optim 
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
+import pandas as pd
 
 def train_one_epoch(model, epoch_index, tb_writer, training_loader, optimizer, loss_function):
     running_loss = 0.
@@ -56,6 +57,7 @@ def train_model(model, training_loader, validation_loader, epochs_num = 50, lear
     best_vloss = float("inf")
 
     loss_history = {
+        "epoch": [],
         "training_loss": [],
         "validation_loss": [],
         "validation_loss_best": []
@@ -95,6 +97,7 @@ def train_model(model, training_loader, validation_loader, epochs_num = 50, lear
             model_path = 'model_{}_{}'.format(timestamp, i + 1)
             torch.save(model.state_dict(), model_path)
 
+        loss_history["epoch"].append(i+1)
         loss_history["training_loss"].append(avg_loss)
         loss_history["validation_loss"].append(avg_vloss)
         loss_history["validation_loss_best"].append(best_vloss)
@@ -102,4 +105,6 @@ def train_model(model, training_loader, validation_loader, epochs_num = 50, lear
         # early stopping
         if avg_vloss < early_stopping_th:
             break
+    df = pd.DataFrame(loss_history)
+    df.to_csv("training_history.csv")
     return loss_history

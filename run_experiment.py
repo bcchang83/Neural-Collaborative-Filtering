@@ -61,7 +61,7 @@ if __name__ == '__main__':
     MLP=True
     
     # hyperparameter for training
-    epochs_num = 3
+    epochs_num = 10
     batch_size = 32
     learning_rate = 0.001
     early_stopping_th = 0.1

@@ -30,15 +30,16 @@ def evaluate(model, testing_loader):
             t_outputs = model(t_user, t_movie)
             t_loss = loss_fn(t_outputs, t_labels)
             running_t_loss += t_loss
-            prediction_loss_dict["UserID"].append(*t_user)
-            prediction_loss_dict["MovieID"].append(*t_movie)
-            prediction_loss_dict["Label"].append(*t_labels)
-            prediction_loss_dict["Prediction"].append(*t_outputs)
+            prediction_results["UserID"].extend(t_user.tolist())
+            prediction_results["MovieID"].extend(t_movie.tolist())
+            prediction_results["Label"].extend(t_labels.tolist())
+            prediction_results["Prediction"].extend(t_outputs.squeeze().tolist()) 
 
     avg_t_loss = running_t_loss / (i + 1)
     print(f"Testing loss = {avg_t_loss}")
     
-    df = pd.DataFrame(prediction_loss_dict)
+    df = pd.DataFrame(prediction_results)
+    df.to_csv("testing_results.csv")
     df.sort_values("Prediction", ascending=False, inplace=True)
     df_top10 = df.head(10)
     # Compure recall at 10

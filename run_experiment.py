@@ -3,8 +3,10 @@ import torch.optim
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
 from train import train_model
+from evaluate import evaluate
 from model import NCF
 from data_preprocess import run_data_preprocess
+
 def train_one_epoch(epoch_index, tb_writer, training_loader, optimizer, loss_function):
     running_loss = 0.
     last_loss = 0.
@@ -66,6 +68,7 @@ if __name__ == '__main__':
     # train model
     training_history = train_model(model=model, training_loader=training_loader, validation_loader=validation_loader, epochs_num=epochs_num, early_stopping_th=early_stopping_th)
     
+    # Here model is trained and saved, time to test!
     
     
     # # Define optimizer and loss function
@@ -117,7 +120,7 @@ if __name__ == '__main__':
     #     if avg_vloss < early_stopping_th:
     #         break
 
-    # Here model is trained and saved, time to test!
+    
 
 
 

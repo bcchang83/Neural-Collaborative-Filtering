@@ -62,7 +62,7 @@ class NCF(nn.Module):
         if self.GMF:
             # hadamard_product = torch.mul(user_embeds, item_embeds)
             hadamard_product = user_embeds * item_embeds
-            GMF_output = nn.Linear(self.embedding_dim, 1)(hadamard_product)
+            GMF_output = hadamard_product #nn.Linear(self.embedding_dim, 1)(hadamard_product)
 
         # MLP layer
         if self.MLP:

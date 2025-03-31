@@ -29,7 +29,7 @@ def negative_sampling(df_rating, df_movie, df_user):
     #Optimized code
     all_users = df_user.UserID.unique()
     all_movies = df_movie.MovieID.unique()
-
+    
     exist_rating = set(zip(df_rating['UserID'], df_rating['MovieID']))
 
     df_pos = df_rating[df_rating.Rating >= 4]
@@ -86,7 +86,7 @@ class CustomDataset(Dataset):
         # turn to torch tensor will be better for later calculation (model training...)
         # -1 cuz index start from 0
         self.users = torch.tensor(dataframe["UserID"].values - 1, dtype=torch.int32)
-        self.items = torch.tensor(dataframe["MovieID"].values - 1, dtype=torch.int32)
+        self.items = torch.tensor(dataframe["MovieID"].values, dtype=torch.int32)
         self.labels = torch.tensor(dataframe["Label"].values, dtype=torch.int32)
     
     def __len__(self):
@@ -109,7 +109,16 @@ def run_data_preprocess(path_rating, path_user, path_movie):
     num_users = len(df_user.UserID.unique())
     num_movies = len(df_movie.MovieID.unique())
     print(f"Number of Users = {num_users}\nNumber of Movies = {num_movies}")
+    
+    # Fix the movie ID problem
+    all_movies = df_movie.MovieID.unique()
+    movieID_map = {}
+    for i in range(len(df_movie)):
+        movieID_map[all_movies[i]] = i
 
+    df_movie["MovieID"] = df_movie.MovieID.replace(movieID_map)
+    df_rating["MovieID"] = df_rating.MovieID.replace(movieID_map)
+    
     # Sample non-interacted movies as negatives
     df_rating_add = negative_sampling(df_rating, df_movie, df_user)
     # print(df_rating_add.Rating.value_counts())

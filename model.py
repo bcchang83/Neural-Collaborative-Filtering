@@ -33,7 +33,8 @@ class NCF(nn.Module):
             NeuMF_size = self.embedding_dim 
         else:
             raise('Please use at least one model, either GMF or MLP')
-        self.NeuMF_layer = nn.Linear(NeuMF_size, 1)
+        self.NeuMF_layer = nn.Sigmoid(NeuMF_size, 1)
+
 
         
         self._init_weight_()

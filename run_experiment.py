@@ -104,4 +104,7 @@ if __name__ == '__main__':
         if avg_vloss < early_stopping_th:
             break
 
+    # Here model is trained and saved, time to test!
+
+
 

@@ -12,17 +12,20 @@ def train_one_epoch(epoch_index, tb_writer, training_loader, optimizer, loss_fun
     # iter(training_loader) so that we can track the batch
     # index and do some intra-epoch reporting
     for i, data in enumerate(training_loader):
+    
         # Every data instance is an input + label pair
-        inputs, labels = data
+        # print(data)
+        user, movie, label = data
+
 
         # Zero your gradients for every batch!
         optimizer.zero_grad()
 
         # Make predictions for this batch
-        outputs = model(inputs)
+        outputs = model(user, movie)
 
         # Compute the loss and its gradients
-        loss = loss_function(outputs, labels)
+        loss = loss_function(outputs, label)
         loss.backward()
 
         # Adjust learning weights

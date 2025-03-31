@@ -1,8 +1,9 @@
 import torch
 import torch.nn as nn
+import numpy as np
 
 class NCF(nn.Module):
-    def __init__(self, num_users, num_movies, embedding_dim=32, dropout=0.1, num_mlp_layers=2, GMF=False, MLP=True):
+    def __init__(self, num_users, num_movies, embedding_dim=32, dropout=0.1, num_mlp_layers=2, GMF=True, MLP=True):
         super(NCF, self).__init__()
 
         self.num_mlp_layers = num_mlp_layers
@@ -11,11 +12,13 @@ class NCF(nn.Module):
         self.GMF = GMF
         self.MLP = MLP
 
-        # Embedding layers
+        # Embedding GMF layers
         self.user_embedding = torch.nn.Embedding(num_users, embedding_dim=embedding_dim)
         self.item_embedding = torch.nn.Embedding(num_movies, embedding_dim=embedding_dim)
 
         # Initialize MLP layers
+        self.embed_user_MLP = nn.Embedding(num_users, embedding_dim * (2 ** (num_mlp_layers - 1)))
+		self.embed_item_MLP = nn.Embedding(num_movies, embedding_dim * (2 ** (num_mlp_layers - 1)))
         MLP_layers = []
         for i in range(self.num_mlp_layers):
             # Input layer shrinks by 2 every time (i times in total). The last layer output has the 
@@ -24,6 +27,7 @@ class NCF(nn.Module):
             MLP_layers.append(nn.Linear(input_size, input_size//2))
             MLP_layers.append(nn.Dropout(self.dropout))
             MLP_layers.append(nn.ReLU())
+            
         self.MLP_layers = nn.Sequential(*MLP_layers)
 
         # Create NeuMF layer
@@ -33,7 +37,7 @@ class NCF(nn.Module):
             NeuMF_size = self.embedding_dim 
         else:
             raise('Please use at least one model, either GMF or MLP')
-        
+        # Final prediction
         self.NeuMF_layer = nn.Sequential(
                 nn.Linear(NeuMF_size, 1),
                 nn.Sigmoid()
@@ -42,9 +46,9 @@ class NCF(nn.Module):
 
 
         
-        self._init_weight_()
+        # self._init_weight_()
         
-        # Final prediction
+        
     
     def forward(self, user_ids, movie_ids):
         user_embeds = self.user_embedding(user_ids)
@@ -52,14 +56,16 @@ class NCF(nn.Module):
 
         # GMF layer
         if self.GMF:
-            hadamard_product = torch.mul(user_embeds, item_embeds)
-            # hadamard_product = self.user_embedding * self.item_embedding
+            # hadamard_product = torch.mul(user_embeds, item_embeds)
+            hadamard_product = user_embeds * item_embeds
             GMF_output = nn.Linear(self.embedding_dim, 1)(hadamard_product)
 
         # MLP layer
         if self.MLP:
-            MLP_output = self.MLP_layers(torch.cat((self.user_embedding, self.item_embedding), -1)) # -1 as we concat along the last dimension
-
+            print(f"user shape={user_embeds.shape}\nmovie shape={item_embeds.shape}\n")
+            breakpoint()
+            MLP_output = self.MLP_layers(torch.cat((user_embeds, item_embeds), -1)) # -1 as we concat along the last dimension
+            
         if self.GMF and self.MLP:
             NeuMF_input = torch.cat((GMF_output, MLP_output), -1)
         elif self.GMF:

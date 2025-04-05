@@ -61,11 +61,11 @@ if __name__ == '__main__':
     MLP=True
     
     # hyperparameter for training
-    epochs_num = 100
+    epochs_num = 10
     batch_size = 256
     learning_rate = 0.001
-    early_stopping_th = 0.1
-    weight_decay = 1e-5
+    early_stopping_th = 0.1 # earlystopping threshold
+    weight_decay = 1e-5 # l2 regularization
     
     # load data and preprocess
     train_set, val_set, test_set, num_users, num_movies = run_data_preprocess(path_rating=path_rating, path_user=path_user, path_movie=path_movie)
@@ -81,20 +81,31 @@ if __name__ == '__main__':
                 dropout=dropout,
                 num_mlp_layers=num_mlp_layers,
                 GMF=GMF, MLP=MLP)
+    print("Model Structure")
     print(model)
+    print('='*80)
     # train model
+    if GMF and MLP:
+        save_path = f"model_edim{embedding_dim}_drop{dropout}_numlayer{num_mlp_layers}_NCF"
+    elif GMF:
+        save_path = f"model_edim{embedding_dim}_drop{dropout}_numlayer{num_mlp_layers}_GMF"
+    elif MLP:
+        save_path = f"model_edim{embedding_dim}_drop{dropout}_numlayer{num_mlp_layers}_MLP"
+    else:
+        raise
     training_history = train_model(model=model,
                                 training_loader=training_loader,
                                 validation_loader=validation_loader,
                                 epochs_num=epochs_num,
                                 learning_rate=learning_rate,
                                 early_stopping_th=early_stopping_th,
-                                weight_decay=weight_decay)
+                                weight_decay=weight_decay,
+                                save_path=save_path)
     
-    plot_training_history(training_history)
+    plot_training_history(training_history, save_path=save_path)
     
     # Here model is trained and saved, time to test!
-    evaluate(model, testing_loader)
+    evaluate(model, testing_loader, save_path=save_path)
     
     # # Define optimizer and loss function
     # optim = torch.optim.Adam(model.parameters(), lr=0.001)

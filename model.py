@@ -39,12 +39,17 @@ class NCF(nn.Module):
         else:
             raise('Please use at least one model, either GMF or MLP')
         # Final prediction
+        # self.NeuMF_layer = nn.Sequential(
+        #         nn.Linear(NeuMF_size, NeuMF_size//2),
+        #         nn.ReLU(),
+        #         nn.Linear(NeuMF_size//2, 1),
+        #         nn.Sigmoid()
+        #         )
+        
         self.NeuMF_layer = nn.Sequential(
-                nn.Linear(NeuMF_size, NeuMF_size//2),
-                nn.ReLU(),
-                nn.Linear(NeuMF_size//2, 1),
-                nn.Sigmoid()
-                )
+            nn.Linear(NeuMF_size, 1),
+            nn.Sigmoid()
+            )
         
         # Loss function
         self.loss_fn = torch.nn.BCELoss()

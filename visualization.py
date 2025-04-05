@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 
-def plot_training_history(history):
+def plot_training_history(history, save_path = "model_results"):
     plt.figure()
     training_loss = history["training_loss"]
     validation_loss = history["validation_loss"]
@@ -16,6 +16,6 @@ def plot_training_history(history):
     plt.title("Training History")
     plt.legend()
     plt.grid(True)
-    plt.savefig("training_history.png")
+    plt.savefig(f"{save_path}/training_history.png")
     plt.show()
     

@@ -45,14 +45,14 @@ def train_one_epoch(model, epoch_index, tb_writer, training_loader, optimizer, l
 
 
 
-def train_model(model, training_loader, validation_loader, epochs_num = 50, learning_rate = 0.001, early_stopping_th = 0.1, weight_decay = 1e-5):
+def train_model(model, training_loader, validation_loader, epochs_num = 50, learning_rate = 0.001, early_stopping_th = 0.1, weight_decay = 1e-5, save_path = "model_results"):
     # Define optimizer and loss function
     optim = torch.optim.Adam(model.parameters(), lr=learning_rate, 
                             weight_decay=weight_decay)# l2 reg
     loss_fn = model.loss_fn
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    writer = SummaryWriter('runs/movielens_training_{}'.format(timestamp))
+    writer = SummaryWriter('{}/runs/movielens_training_{}'.format(save_path, timestamp))
     # epochs_num = 10
     # early_stopping_th = 0.1
     best_vloss = float("inf")
@@ -95,7 +95,7 @@ def train_model(model, training_loader, validation_loader, epochs_num = 50, lear
         # Track best performance, and save the model's state
         if avg_vloss < best_vloss:
             best_vloss = avg_vloss
-            model_path = 'model_{}_{}'.format(timestamp, i + 1)
+            model_path = '{}/model_{}_{}'.format(save_path, timestamp, i + 1)
             torch.save(model.state_dict(), model_path)
 
         loss_history["epoch"].append(i+1)
@@ -107,5 +107,5 @@ def train_model(model, training_loader, validation_loader, epochs_num = 50, lear
         if avg_vloss < early_stopping_th:
             break
     df = pd.DataFrame(loss_history)
-    df.to_csv("training_history.csv")
+    df.to_csv(f"{save_path}/training_history.csv")
     return loss_history

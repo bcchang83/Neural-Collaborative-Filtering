@@ -35,7 +35,8 @@ def negative_sampling(df_rating, df_movie, df_user):
     df_pos = df_rating[df_rating.Rating >= 4]
     df_neg = df_rating[df_rating.Rating < 4]
 
-    diff = len(df_pos) - len(df_neg)
+    # diff = len(df_pos) - len(df_neg) #implicit negative interactions doesnt care about low rating
+    diff = len(df_pos)
     sampled_data = []
     while diff > 0:
         user = np.random.choice(all_users)
@@ -126,7 +127,8 @@ def run_data_preprocess(path_rating, path_user, path_movie):
     # Label
     df_rating_add["Label"] = -1
     df_rating_add.loc[df_rating_add.Rating >= 4,'Label'] = 1
-    df_rating_add.loc[df_rating_add.Rating < 4,'Label'] = 0
+    # df_rating_add.loc[df_rating_add.Rating < 4,'Label'] = 0 # should ignore 1~3
+    df_rating_add.loc[df_rating_add.Rating == 0,'Label'] = 0
     # print(df_rating_add['Label'].value_counts())
     # balance the label?
 
